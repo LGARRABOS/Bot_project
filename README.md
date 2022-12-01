@@ -42,4 +42,10 @@ success
 [etienne@server ~]$ sudo firewall-cmd --reload
 [etienne@server ~]$ sudo dnf install -y tar
 [etienne@server ~]$ tar xvzf ngrok-v3-stable-linux-amd64.tgz
+[etienne@server ~]$ curl -SLO https://cdn.darrennathanael.com/jars/application.yml
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  2197  100  2197    0     0   8930      0 --:--:-- --:--:-- --:--:--  8894
+[etienne@server ~]$ sudo mv Lavalink.jar serverBot/
+[etienne@server ~]$ sudo mv application.yml serverBot/
 ```
