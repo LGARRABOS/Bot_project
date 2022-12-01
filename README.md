@@ -10,9 +10,8 @@ Step 3: create a bot invitelink using it's client id here
 
 Step 4: save the bot token for later
 
-# TP5: Bot Music Discord
+## Install nodejs & npm (Bot Machine)
 
-Installation Bot
 ```
 [etienne@bot ~]$ sudo dnf update
 Complete!
@@ -28,7 +27,7 @@ Resolving deltas: 100% (2886/2886), done.
         clientSecret: process.env.clientSecret || "YOUR_PERSONAL_CLIENT_SECRET", //- Client Secret of the bot
 ```
 
-Installation Server
+## Install Lavalink (Serveur Machine)
 ```
 [etienne@server ~]$ sudo dnf update -y
 Complete!
