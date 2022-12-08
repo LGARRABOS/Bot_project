@@ -75,32 +75,67 @@ Successfully deployed commands!
 [etienne@bot Discord-MusicBot]$ npm run start
 ```
 
-# Server bot
-
 ```
-[etienne@server ~]$ sudo dnf update -y
-Complete!
-[etienne@server ~]$ sudo dnf install nginx -y
-Complete!
-[etienne@server ~]$ sudo dnf install -y tar
-Complete!
-[etienne@server ~]$ curl -SLO https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
-[etienne@server ~]$ tar xvzf ngrok-v3-stable-linux-amd64.tgz
-ngrok
-[etienne@server ~]$ chmod +x ngrok
-[etienne@server ~]$ sudo mv ngrok /usr/local/bin/
-sudo mv ngrok /usr/local/bin/
-[etienne@server ~]$ ngrok config add-authtoken 2IJGbuhtB3xfsEoY3ZpaiHL4mnB_5RZUiAB5YeV59HepLK6M
-Authtoken saved to configuration file: /home/etienne/.config/ngrok/ngrok.yml
-[etienne@server ~]$ cd /etc/nginx
-[etienne@server nginx]$ sudo mkdir sites-available
-[etienne@server nginx]$ ls
-sites-available
-[etienne@server nginx]$ sudo nano /etc/nginx/sites-available/musicbot.conf
-[etienne@server nginx]$ sudo cat /etc/nginx/sites-available/musicbot.conf
+[etienne@bot ~]$ sudo dnf install nginx -y
+[etienne@bot ~]$ sudo vim /etc/nginx/nginx.conf
+[etienne@bot ~]$ cat /etc/nginx/nginx.conf
+# For more information on configuration, see:
+#   * Official English Documentation: http://nginx.org/en/docs/
+#   * Official Russian Documentation: http://nginx.org/ru/docs/
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+# Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 4096;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    # Load modular configuration files from the /etc/nginx/conf.d directory.
+    # See http://nginx.org/en/docs/ngx_core_module.html#include
+    # for more information.
+    include /etc/nginx/conf.d/*.conf;
+
+}
+
+[etienne@bot ~]$ sudo systemctl enable nginx
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service.
+[etienne@bot ~]$ sudo systemctl start nginx
+[etienne@bot ~]$ sudo systemctl status nginx
+     Active: active (running) since Thu 2022-12-08 10:54:46 CET; 8s ago
+
+[etienne@bot ~]$ cd Discord-MusicBot/dashboard/
+[etienne@bot dashboard]$ npm install
+found 0 vulnerabilities
+[etienne@bot dashboard]$ npm run build
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+[etienne@bot dashboard]$ npm run export
+Export successful. Files written to /home/etienne/Discord-MusicBot/dashboard/o
+[etienne@bot dashboard]$ sudo nano /etc/nginx/conf.d/musicbot.conf
+[etienne@bot dashboard]$ cat /etc/nginx/conf.d/musicbot.conf
 server {
     listen 80;
-    server_name webBot;
+    server_name foo.bar;
 
     location / {
         proxy_set_header   X-Forwarded-For $remote_addr;
@@ -108,13 +143,26 @@ server {
         proxy_pass         http://127.0.0.1:3000;
     }
 }
-[etienne@server nginx]$ sudo firewall-cmd --add-port=80/tcp --permanent
+[etienne@bot dashboard]$ sudo firewall-cmd --add-port=80/tcp --permanent
 success
-[etienne@server nginx]$ sudo firewall-cmd --reload
+[etienne@bot dashboard]$ sudo firewall-cmd --reload
 success
-[etienne@server nginx]$ sudo systemctl start nginx
-[etienne@server nginx]$ sudo systemctl status nginx
-[etienne@server ~]$ sudo dnf install git -y
-Complete!
-[etienne@server ~]$ git clone https://github.com/SudhanPlayz/Discord-MusicBot.git
+[etienne@bot dashboard]$ sudo systemctl enable nginx
+[etienne@bot dashboard]$ sudo systemctl start nginx
+[etienne@bot dashboard]$ sudo systemctl status nginx
+     Active: active (running) since Thu 2022-12-08 10:54:46 CET; 29min ago
 ```
+
+```
+[etienne@bot Discord-MusicBot]$ java -jar Lavalink.jar
+[etienne@bot Discord-MusicBot]$ npm run start
+[etienne@bot dashboard]$ npm run start
+```
+
+[etienne@bot ~]$ curl -SLO https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+[etienne@bot ~]$ tar xvzf ngrok-v3-stable-linux-amd64.tgz
+ngrok
+[etienne@bot ~]$ chmod +x ngrok
+[etienne@bot ~]$ sudo mv ngrok /usr/local/bin/
+[etienne@bot ~]$ sudo ngrok config add-authtoken 2IJGbuhtB3xfsEoY3ZpaiHL4mnB_5RZUiAB5YeV59HepLK6M
+sudo mv ngrok /usr/local/bin/
