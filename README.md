@@ -268,3 +268,14 @@ WantedBy=multi-user.target
      Active: active (running) since Sun 2022-12-11 21:06:04 CET; 9s ago
 ```
 
+## Annexe pour Rendre le site web accessible a tout le monde
+```
+[etienne@bot ~]$ sudo dnf install -y tar
+[etienne@bot ~]$ curl -SLO https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+[etienne@bot ~]$ tar xvzf ngrok-v3-stable-linux-amd64.tgz
+ngrok
+[etienne@bot ~]$ chmod +x ngrok
+[etienne@bot ~]$ sudo mv ngrok /usr/local/bin/
+[etienne@bot ~]$ sudo ngrok config add-authtoken 2IJGbuhtB3xfsEoY3ZpaiHL4mnB_5RZUiAB5YeV59HepLK6M
+sudo mv ngrok /usr/local/bin/
+```

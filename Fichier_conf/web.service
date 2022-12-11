@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the site web
+
+[Service]
+ExecStart=bash /usr/bin/run_site_web.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the lavalink
+
+[Service]
+ExecStart=bash /usr/bin/run_lavalink.sh
+
+[Install]
+WantedBy=multi-user.target

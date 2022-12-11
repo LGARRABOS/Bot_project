@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the bot
+
+[Service]
+ExecStart=bash /usr/bin/lance_le_bot.sh
+
+[Install]
+WantedBy=multi-user.target
