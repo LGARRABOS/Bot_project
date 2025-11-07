@@ -1,281 +1,111 @@
 # Bot_project
 
-## Create a Discord Application
+Ce dépôt propose une image Docker prête à l'emploi pour exécuter [Discord-MusicBot](https://github.com/SudhanPlayz/Discord-MusicBot) ainsi qu'un serveur [Lavalink](https://github.com/freyacodes/Lavalink). L'objectif est de pouvoir lancer rapidement le bot tout en restant capable de personnaliser le token et les paramètres principaux via des variables d'environnement.
 
-Step 1: go to the [Discord Developer portal](https://discord.com/developers/applications)
+## Prérequis
 
-Step 2: create a new application + bot
+- Docker 20.10+ ou Podman 4+
+- Un bot Discord configuré depuis le [Discord Developer Portal](https://discord.com/developers/applications) avec son token, son client ID et son client secret.
 
-Step 3: create a bot invitelink using it's client id here
+## Construction de l'image
 
-Step 4: save the bot token for later
-
-## Bot
-
-
-### Instalation
-```
-[etienne@bot ~]$ sudo dnf update
-Complete!
-[etienne@bot ~]$ sudo dnf install nodejs -y
-Complete!
-[etienne@bot ~]$ sudo dnf install git
-Complete!
-[etienne@bot ~]$ git clone -b v5 https://github.com/SudhanPlayz/Discord-MusicBot.git
-Resolving deltas: 100% (2886/2886), done.
+```bash
+# À exécuter à la racine du dépôt
+docker build -t discord-musicbot:latest .
 ```
 
+L'image télécharge automatiquement le code officiel du bot (branche `v5`), installe les dépendances Node.js et récupère Lavalink 4.0.6.
 
-### Configuration du bot
+## Variables d'environnement disponibles
 
-```
-[etienne@bot Discord-MusicBot]$ sudo nano config.js
-        token: process.env.token || "YOUR_PERSONAL_TOKEN", //- Bot's Token
-        clientId: process.env.clientId || "YOUR_PERSONAL_CLIENT_ID", //- ID of the bot
-        clientSecret: process.env.clientSecret || "YOUR_PERSONAL_CLIENT_SECRET", //- Client Secret of the bot
-        cookieSecret: "YOUR_OWN_SECRET_COOKIE",
-        [...]
-                nodes: [
-                {
-                        identifier: "Main Node", //- Used for indentifier in stats commands.
-                        host: "localhost", //- The host name or IP of the lavalink server.
-                        port: 8080, // The port that lavalink is listening to. This must be a number!
-                        password: "YOUR_PASSWORD", //- The password of the lavalink server.
-                        retryAmount: 200, //- The amount of times to retry connecting to the node if connection got dropped.
-                        retryDelay: 40, //- Delay between reconnect attempts if connection is lost.
-                        secure: false, //- Can be either true or false. Only use true if ssl is enabled!
-                },
-        ],
-```
+Les variables suivantes peuvent être passées à `docker run -e NOM=VALEUR ...` ou à un orchestrateur (Docker Compose, Kubernetes, etc.). Les variables marquées comme **obligatoires** doivent absolument être définies.
 
-## Lavalink
+| Variable | Obligatoire | Valeur par défaut | Description |
+|----------|-------------|-------------------|-------------|
+| `DISCORD_TOKEN` | ✅ | – | Token du bot Discord. |
+| `DISCORD_CLIENT_ID` | ✅ | – | Client ID du bot. |
+| `DISCORD_CLIENT_SECRET` | ✅ | – | Client secret du bot. |
+| `LAVALINK_PASSWORD` | ✅ | – | Mot de passe utilisé par Lavalink et par le bot. |
+| `PORT` | ❌ | `3000` | Port utilisé par l'API/dashboard du bot. |
+| `CMD_PER_PAGE` | ❌ | `10` | Nombre de commandes affichées par page pour l'aide. |
+| `ADMIN_ID` | ❌ | `""` | Identifiant Discord qui aura les droits administrateur. |
+| `SERVER_DEAFEN` | ❌ | `true` | Laisse le bot auto-sourdine. |
+| `DEFAULT_VOLUME` | ❌ | `30` | Volume par défaut du bot (1–100). |
+| `TWENTY_FOUR_SEVEN` | ❌ | `false` | Empêche le bot de quitter le salon vocal. |
+| `AUTO_QUEUE` | ❌ | `false` | Active la mise en file automatique de chansons liées. |
+| `AUTO_PAUSE` | ❌ | `true` | Met en pause quand tout le monde quitte le salon. |
+| `DEBUG_MODE` | ❌ | `false` | Active les logs de debug. |
+| `COOKIE_SECRET` | ❌ | `change-me` | Secret utilisé pour les cookies du tableau de bord. |
+| `WEBSITE_URL` | ❌ | `http://localhost:3000` | URL publique du tableau de bord (sans slash final). |
+| `SUPPORT_SERVER` | ❌ | `https://discord.gg/sbySMS7m3v` | Lien vers le serveur de support affiché par le bot. |
+| `ISSUES_URL` | ❌ | `https://github.com/SudhanPlayz/Discord-MusicBot/issues` | Lien vers le suivi des bugs. |
+| `DISCORD_SCOPES` | ❌ | `identify,guilds,applications.commands` | Liste de scopes OAuth2 séparés par des virgules. |
+| `DISCORD_PERMISSIONS` | ❌ | `277083450689` | Permissions à utiliser lors de l'invitation du bot. |
+| `DISCONNECT_TIME` | ❌ | `30000` | Temps en millisecondes avant la déconnexion automatique. |
+| `EMBED_COLOR` | ❌ | `#2f3136` | Couleur hexadécimale utilisée dans les embeds. |
+| `PRESENCE_STATUS` | ❌ | `online` | Statut du bot (`online`, `idle`, `dnd`, `invisible`). |
+| `BOT_ACTIVITY_NAME` | ❌ | `Music` | Texte affiché dans l'activité. |
+| `BOT_ACTIVITY_TYPE` | ❌ | `LISTENING` | Type d'activité (`PLAYING`, `WATCHING`, `LISTENING`, `STREAMING`). |
+| `BOT_ACTIVITY_URL` | ❌ | – | URL utilisée uniquement si le type est `STREAMING`. |
+| `ICON_URL` | ❌ | `https://cdn.darrennathanael.com/icons/spinning_disk.gif` | Icône utilisée dans les embeds. |
+| `ENABLE_LAVALINK` | ❌ | `true` | Permet de désactiver le Lavalink intégré (utile si vous en utilisez un externe). |
+| `LAVALINK_HOST` | ❌ | `localhost` | Hôte du Lavalink auquel se connecter. |
+| `LAVALINK_PORT` | ❌ | `2333` | Port du Lavalink. |
+| `LAVALINK_IDENTIFIER` | ❌ | `Main Node` | Nom affiché pour le nœud Lavalink. |
+| `LAVALINK_RETRY_AMOUNT` | ❌ | `200` | Nombre de tentatives de reconnexion. |
+| `LAVALINK_RETRY_DELAY` | ❌ | `40` | Délai en secondes entre les tentatives. |
+| `LAVALINK_SECURE` | ❌ | `false` | Active TLS pour Lavalink si `true`. |
+| `LAVALINK_SERVER_ADDRESS` | ❌ | `0.0.0.0` | Adresse d'écoute du Lavalink intégré. |
+| `LAVALINK_METRICS_ENABLED` | ❌ | `true` | Active l'endpoint Prometheus du Lavalink. |
 
+## Exemple de lancement
 
-### Instalation
-```
-[etienne@bot ~$ dnf search openjdk
-Complete!
-[etienne@bot ~]$ sudo dnf install java-17-openjdk java-17-openjdk-devel
-Complete!
-[etienne@bot ~]$ sudo dnf install npm -y
-Complete!
-```
-
-### Recupération du Lavalink et de l'application
-```
-[etienne@bot ~]$ curl -SLO https://github.com/freyacodes/Lavalink/releases/download/3.4/Lavalink.jar
-100 39.3M  100 39.3M    0     0  5471k      0  0:00:07  0:00:07 --:--:-- 5409k
-[etienne@bot Discord-MusicBot]$ curl -SLO https://cdn.darrennathanael.com/jars/application.yml
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  2197  100  2197    0     0   8930      0 --:--:-- --:--:-- --:--:--  8894
-```
-
-### Configuration de l'application.yml
-```
-[etienne@bot Discord-MusicBot]$ sudo cat application.yml
-server: # REST and WS server
-  port: 8080
-  address: 0.0.0.0
-[etienne@bot ~]$ sudo mv Lavalink.jar Discord-MusicBot/
-[etienne@bot ~]$ sudo mv application.yml Discord-MusicBot/
-```
-
-### Firewall
-```
-[etienne@bot ~]$ sudo firewall-cmd --add-port=8080/tcp --permanent
-[sudo] password for etienne:
-success
-[etienne@bot ~]$ sudo firewall-cmd --reload
+```bash
+docker run -d \
+  --name discord-musicbot \
+  -p 3000:3000 \
+  -p 2333:2333 \
+  -e DISCORD_TOKEN="votre_token" \
+  -e DISCORD_CLIENT_ID="votre_client_id" \
+  -e DISCORD_CLIENT_SECRET="votre_client_secret" \
+  -e LAVALINK_PASSWORD="motdepassefort" \
+  discord-musicbot:latest
 ```
 
-## Commander pour lancer intialiser et lancer le bot
-```
-[etienne@bot Discord-MusicBot]$ npm install
-npm notice
-[etienne@bot Discord-MusicBot]$ npm run deploy
-Successfully deployed commands!
-[etienne@bot Discord-MusicBot]$ npm run start
-```
+Le conteneur démarre alors deux processus :
+- le bot Discord (`npm run start`),
+- un serveur Lavalink Java configuré automatiquement via les variables d'environnement ci-dessus.
 
-## Le serveur
+### Déploiement des commandes slash
 
-**Disclaimer le serveur de la solution ne fonctionne pas correctement notament du au chemin de fichier utiliser dans le code. De ce fait vous aurait un site web lancer mais il ne marchera pas avec le bot**
+Avant le premier démarrage (ou après toute modification des commandes), lancez la commande suivante pour enregistrer les commandes slash du bot :
 
-### Installation et configuration du serveur nginx
-```
-[etienne@bot ~]$ sudo dnf install nginx -y
-[etienne@bot ~]$ sudo vim /etc/nginx/nginx.conf
-[etienne@bot ~]$ cat /etc/nginx/nginx.conf
-# For more information on configuration, see:
-#   * Official English Documentation: http://nginx.org/en/docs/
-#   * Official Russian Documentation: http://nginx.org/ru/docs/
-
-user nginx;
-worker_processes auto;
-error_log /var/log/nginx/error.log;
-pid /run/nginx.pid;
-
-# Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
-include /usr/share/nginx/modules/*.conf;
-
-events {
-    worker_connections 1024;
-}
-
-http {
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
-
-    access_log  /var/log/nginx/access.log  main;
-
-    sendfile            on;
-    tcp_nopush          on;
-    tcp_nodelay         on;
-    keepalive_timeout   65;
-    types_hash_max_size 4096;
-
-    include             /etc/nginx/mime.types;
-    default_type        application/octet-stream;
-
-    # Load modular configuration files from the /etc/nginx/conf.d directory.
-    # See http://nginx.org/en/docs/ngx_core_module.html#include
-    # for more information.
-    include /etc/nginx/conf.d/*.conf;
-
-}
+```bash
+docker run --rm \
+  -e DISCORD_TOKEN="votre_token" \
+  -e DISCORD_CLIENT_ID="votre_client_id" \
+  -e DISCORD_CLIENT_SECRET="votre_client_secret" \
+  -e LAVALINK_PASSWORD="motdepassefort" \
+  discord-musicbot:latest npm run deploy
 ```
 
-### Configuration du dashboard
-```
-[etienne@bot ~]$ cd Discord-MusicBot/dashboard/
-[etienne@bot dashboard]$ npm install
-found 0 vulnerabilities
-[etienne@bot dashboard]$ npm run build
-○  (Static)  automatically rendered as static HTML (uses no initial props)
-[etienne@bot dashboard]$ npm run export
-Export successful. Files written to /home/etienne/Discord-MusicBot/dashboard/o
-```
+### Utilisation d'un Lavalink externe
 
-### Ajout du serveur
-```
-[etienne@bot dashboard]$ sudo nano /etc/nginx/conf.d/musicbot.conf
-[etienne@bot dashboard]$ cat /etc/nginx/conf.d/musicbot.conf
-server {
-    listen 80;
-    server_name foo.bar;
+Si vous possédez déjà un serveur Lavalink, positionnez `ENABLE_LAVALINK=false` et ajustez `LAVALINK_HOST`, `LAVALINK_PORT`, `LAVALINK_SECURE` et `LAVALINK_PASSWORD` pour pointer vers votre instance. Le conteneur ne démarrera alors que le bot Node.js.
 
-    location / {
-        proxy_set_header   X-Forwarded-For $remote_addr;
-        proxy_set_header   Host $http_host;
-        proxy_pass         http://127.0.0.1:3000;
-    }
-}
-```
+## Fichiers de configuration hors Docker
 
-### Firewall
-```
-[etienne@bot dashboard]$ sudo firewall-cmd --add-port=80/tcp --permanent
-success
-[etienne@bot dashboard]$ sudo firewall-cmd --reload
-success
-```
+Le dossier [`Fichier_conf`](Fichier_conf) contient :
 
-### Lancement du serveur nginx
-```
-[etienne@bot ~]$ sudo systemctl enable nginx
-Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service.
-[etienne@bot dashboard]$ sudo systemctl start nginx
-[etienne@bot dashboard]$ sudo systemctl status nginx
-     Active: active (running) since Thu 2022-12-08 10:54:46 CET; 29min ago
-```
+- `config.js` – le même fichier de configuration utilisé dans l'image Docker. Il lit toutes les valeurs depuis les variables d'environnement et peut servir de base si vous exécutez le bot en dehors d'un conteneur.
+- `application.yml` – configuration par défaut de Lavalink (mot de passe à remplacer) pour un déploiement manuel.
 
-## Commande pour lancer le bot, le lavalink et sahboard (executer les commandes dans l'ordre ci-dessous)
-```
-[etienne@bot Discord-MusicBot]$ java -jar Lavalink.jar
-[etienne@bot Discord-MusicBot]$ npm run start
-[etienne@bot dashboard]$ npm run start
-```
+## Dépannage rapide
 
-## Création des services
+- **Erreur `Environment variable ... is required.`** : vérifiez que vous avez bien défini les variables d'environnement obligatoires (`DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `LAVALINK_PASSWORD`).
+- **Impossible de se connecter à Lavalink** : assurez-vous que le mot de passe et le port sont identiques côté bot et côté serveur Lavalink.
+- **Les commandes slash n'apparaissent pas** : rejouez `npm run deploy` comme indiqué ci-dessus et attendez quelques minutes que Discord propage les commandes.
 
+## Licence
 
-### Service lancement du bot
-```
-[etienne@bot ~]$ sudo nano /usr/bin/lance_le_bot.sh
-[etienne@bot ~]$ cat /usr/bin/lance_le_bot.sh
-cd LE_CHEMIN_DU_FICHIER/Discord-MusicBot
-npm run start
-[etienne@bot ~]$ sudo nano /etc/systemd/system/bot.service
-[etienne@bot ~]$ cat /usr/bin/lance_le_bot.sh
-cd /home/etienne/Discord-MusicBot
-npm run start
-[etienne@bot ~]$ cat /etc/systemd/system/bot.service
-[Unit]
-Description=Run the bot
-
-[Service]
-ExecStart=bash /usr/bin/lance_le_bot.sh
-
-[Install]
-WantedBy=multi-user.target
-[etienne@bot ~]$ sudo systemctl daemon-reload
-[etienne@bot ~]$ sudo systemctl start bot
-[etienne@bot ~]$ sudo systemctl status bot
-     Active: active (running) since Sun 2022-12-11 19:56:07 CET; 4s ago
-
-```
-
-### Service lancement du Lavalink
-```
-[etienne@bot ~]$ sudo cat /usr/bin/run_lavalink.sh
-cd LE_CHEMIN_DU_FICHIER/Discord-MusicBot
-java -jar Lavalink.jar
-[etienne@bot ~]$ sudo cat /etc/systemd/system/lavalink.service
-[Unit]
-Description=Run the lavalink
-
-[Service]
-ExecStart=bash /usr/bin/run_lavalink.sh
-
-[Install]
-WantedBy=multi-user.target
-[etienne@bot ~]$ sudo systemctl daemon-reload
-[etienne@bot ~]$ sudo systemctl start lavalink
-[etienne@bot ~]$ sudo systemctl status lavalink
-     Active: active (running) since Sun 2022-12-11 20:09:45 CET; 7s ago
-```
-
-### Service lancement du Site Web
-```
-[etienne@bot ~]$ sudo nano /usr/bin/run_site_web.sh
-[etienne@bot ~]$ sudo cat /usr/bin/run_site_web.sh
-cd LE_CHEMIN_DU_FICHIER/Discord-MusicBot/dashboard
-npm run start
-[etienne@bot ~]$ sudo nano /etc/systemd/system/web.service
-[etienne@bot ~]$ cat /etc/systemd/system/web.service
-[Unit]
-Description=Run the site web
-
-[Service]
-ExecStart=bash /usr/bin/run_site_web.sh
-
-[Install]
-WantedBy=multi-user.target
-[etienne@bot ~]$ sudo systemctl start web
-[etienne@bot ~]$ sudo systemctl status web
-     Active: active (running) since Sun 2022-12-11 21:06:04 CET; 9s ago
-```
-
-## Annexe pour Rendre le site web accessible a tout le monde
-```
-[etienne@bot ~]$ sudo dnf install -y tar
-[etienne@bot ~]$ curl -SLO https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
-[etienne@bot ~]$ tar xvzf ngrok-v3-stable-linux-amd64.tgz
-ngrok
-[etienne@bot ~]$ chmod +x ngrok
-[etienne@bot ~]$ sudo mv ngrok /usr/local/bin/
-[etienne@bot ~]$ sudo ngrok config add-authtoken 2IJGbuhtB3xfsEoY3ZpaiHL4mnB_5RZUiAB5YeV59HepLK6M
-sudo mv ngrok /usr/local/bin/
-```
+Les fichiers originaux du bot et de Lavalink restent soumis à leurs licences respectives. Ce dépôt ne fait qu'automatiser leur installation et leur configuration.
