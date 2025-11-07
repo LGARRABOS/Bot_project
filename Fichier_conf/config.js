@@ -1,46 +1,110 @@
+const required = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Environment variable ${name} is required.`);
+  }
+  return value;
+};
+
+const parseNumber = (name, defaultValue) => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === "") {
+    return defaultValue;
+  }
+
+  const parsed = Number(raw);
+
+  if (Number.isNaN(parsed)) {
+    throw new Error(`Environment variable ${name} must be a valid number.`);
+  }
+
+  return parsed;
+};
+
+const parseBoolean = (name, defaultValue) => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === "") {
+    return defaultValue;
+  }
+
+  const normalized = raw.toString().trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+
+  throw new Error(
+    `Environment variable ${name} must be a boolean (true/false, 1/0, yes/no, on/off).`
+  );
+};
+
+const parseList = (name, fallback) => {
+  const raw = process.env[name];
+  if (!raw) {
+    return fallback;
+  }
+
+  return raw
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+};
+
+const parsePresenceActivities = () => {
+  const activityName = process.env.BOT_ACTIVITY_NAME || "Music";
+  const activityType = (process.env.BOT_ACTIVITY_TYPE || "LISTENING").toUpperCase();
+  const activityUrl = process.env.BOT_ACTIVITY_URL;
+
+  const activity = {
+    name: activityName,
+    type: activityType,
+  };
+
+  if (activityType === "STREAMING" && activityUrl) {
+    activity.url = activityUrl;
+  }
+
+  return [activity];
+};
+
 module.exports = {
-	cmdPerPage: 10, //- Number of commands per page of help command
-	adminId: "UserId", //- Replace UserId with the Discord ID of the admin of the bot
-	token: "MTA0NzgxNzE3ODc4NDc0MzQyNA.Gns3o2.AjqelHxLrVL9VvsOINmIQH0LenFczWS3EhfSjE", //- Bot's Token
-	clientId: "1047817178784743424", //- ID of the bot
-	clientSecret: "p--2eIeECRf6Pp-EKkGNtjFPBhobNO_2", //- Client Secret of the bot
-	port: 80, //- Port of the API and Dashboard
-	scopes: ["identify", "guilds", "applications.commands"], //- Discord OAuth2 Scopes
-	serverDeafen: true, //- If you want bot to stay deafened
-	defaultVolume: 30, //- Sets the default volume of the bot, You can change this number anywhere from 1 to 100
-	supportServer: "https://discord.gg/sbySMS7m3v", //- Support Server Link
-	Issues: "https://github.com/SudhanPlayz/Discord-MusicBot/issues", //- Bug Report Link
-	permissions: 277083450689, //- Bot Inviting Permissions
-	disconnectTime: 30000, //- How long should the bot wait before disconnecting from the voice channel (in miliseconds). Set to 1 for instant disconnect.
-	twentyFourSeven: true, //- When set to true, the bot will never disconnect from the voice channel
-	autoQueue: false, //- When set to true, related songs will automatically be added to the queue
-	autoPause: true, //- When set to true, music will automatically be paused if everyone leaves the voice channel
-	debug: false, //- Debug mode
-	cookieSecret: "6KfJr61oBHeaRqDrRNeJk5GhaUr0yu", //- Cookie Secret
-	website: "http://10.102.1.11:80", //- without the / at the end
-	// You need a lavalink server for this bot to work!!!!
-	// Lavalink server; public lavalink -> https://lavalink-list.darrennathanael.com/; create one yourself -> https://darrennathanael.com/post/how-to-lavalink
-	nodes: [
-		{
-			identifier: "Main Node", //- Used for indentifier in stats commands.
-			host: "localhost", //- The host name or IP of the lavalink server.
-			port: 8080, // The port that lavalink is listening to. This must be a number!
-			password: "POsnAIhibRaCZTfT6D78FOPWJFOWGg", //- The password of the lavalink server.
-			retryAmount: 200, //- The amount of times to retry connecting to the node if connection got dropped.
-			retryDelay: 40, //- Delay between reconnect attempts if connection is lost.
-			secure: false, //- Can be either true or false. Only use true if ssl is enabled!
-		},
-	],
-	embedColor: "#2f3136", //- Color of the embeds, hex supported
-	presence: {
-		// PresenceData object | https://discord.js.org/#/docs/main/stable/typedef/PresenceData
-		status: "online", //- You can have online, idle, dnd and invisible (Note: invisible makes people think the bot is offline)
-		activities: [
-			{
-				name: "Music", //- Status Text
-				type: "LISTENING", //- PLAYING, WATCHING, LISTENING, STREAMING
-			},
-		],
-	},
-	iconURL: "https://cdn.darrennathanael.com/icons/spinning_disk.gif", //- This icon will be in every embed's author field
+  cmdPerPage: parseNumber("CMD_PER_PAGE", 10),
+  adminId: process.env.ADMIN_ID || "",
+  token: required("DISCORD_TOKEN"),
+  clientId: required("DISCORD_CLIENT_ID"),
+  clientSecret: required("DISCORD_CLIENT_SECRET"),
+  port: parseNumber("PORT", 3000),
+  scopes: parseList("DISCORD_SCOPES", ["identify", "guilds", "applications.commands"]),
+  serverDeafen: parseBoolean("SERVER_DEAFEN", true),
+  defaultVolume: parseNumber("DEFAULT_VOLUME", 30),
+  supportServer: process.env.SUPPORT_SERVER || "https://discord.gg/sbySMS7m3v",
+  Issues: process.env.ISSUES_URL || "https://github.com/SudhanPlayz/Discord-MusicBot/issues",
+  permissions: parseNumber("DISCORD_PERMISSIONS", 277083450689),
+  disconnectTime: parseNumber("DISCONNECT_TIME", 30000),
+  twentyFourSeven: parseBoolean("TWENTY_FOUR_SEVEN", false),
+  autoQueue: parseBoolean("AUTO_QUEUE", false),
+  autoPause: parseBoolean("AUTO_PAUSE", true),
+  debug: parseBoolean("DEBUG_MODE", false),
+  cookieSecret: process.env.COOKIE_SECRET || "change-me", // Replace before running in production
+  website: process.env.WEBSITE_URL || "http://localhost:3000", // without the / at the end
+  nodes: [
+    {
+      identifier: process.env.LAVALINK_IDENTIFIER || "Main Node",
+      host: process.env.LAVALINK_HOST || "localhost",
+      port: parseNumber("LAVALINK_PORT", 2333),
+      password: required("LAVALINK_PASSWORD"),
+      retryAmount: parseNumber("LAVALINK_RETRY_AMOUNT", 200),
+      retryDelay: parseNumber("LAVALINK_RETRY_DELAY", 40),
+      secure: parseBoolean("LAVALINK_SECURE", false),
+    },
+  ],
+  embedColor: process.env.EMBED_COLOR || "#2f3136",
+  presence: {
+    status: (process.env.PRESENCE_STATUS || "online").toLowerCase(),
+    activities: parsePresenceActivities(),
+  },
+  iconURL:
+    process.env.ICON_URL || "https://cdn.darrennathanael.com/icons/spinning_disk.gif",
 };
